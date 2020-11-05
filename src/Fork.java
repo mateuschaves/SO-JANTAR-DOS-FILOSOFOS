@@ -1,6 +1,6 @@
 public class Fork {
 
-    private boolean inUse;
+    private boolean inUse = false;
 
     public boolean getInUse() {
         return this.inUse;

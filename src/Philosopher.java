@@ -3,11 +3,11 @@ import java.util.Random;
 
 public class Philosopher extends Thread {
 
-    String name;
-    int positionInTable;
-    int minThinkEatTime;
-    int maxThinkEatTime;
-    ArrayList<Fork> forks;
+    private String name;
+    private int positionInTable;
+    private int minThinkEatTime;
+    private int maxThinkEatTime;
+    private ArrayList<Fork> forks;
 
     Philosopher(ArrayList<Fork> forks, int positionInTable, int minThinkEatTime, int maxThinkEatTime, String name) {
         this.forks = forks;
@@ -32,7 +32,9 @@ public class Philosopher extends Thread {
             throws InterruptedException {
         if (this.getLeftFork(forks, positionInTable).getInUse()
                 && this.getRightFork(forks, positionInTable).getInUse()) {
-            forks.wait();
+            synchronized (forks) {
+                forks.wait();
+            }
         } else {
 
             this.getLeftFork(forks, positionInTable).setInUse(true);
@@ -46,9 +48,10 @@ public class Philosopher extends Thread {
             this.getLeftFork(forks, positionInTable).setInUse(false);
             this.getRightFork(forks, positionInTable).setInUse(false);
 
-            forks.notify();
+            synchronized (forks) {
+                forks.notifyAll();
+            }
         }
-
     }
 
     void thinking(int minThinkEatTime, int maxThinkEatTime) throws InterruptedException {
@@ -63,7 +66,7 @@ public class Philosopher extends Thread {
     }
 
     Fork getRightFork(ArrayList<Fork> forks, int positionInTable) {
-        return forks.get((positionInTable + 1) > forks.size() ? 0 : positionInTable + 1);
+        return forks.get((positionInTable + 1) >= forks.size() ? 0 : positionInTable + 1);
     }
 
     int generateRandomTime(int minThinkEatTime, int maxThinkEatTime) {
